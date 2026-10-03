@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WebServCo\Error\Service;
 
 use ErrorException;
+use Override;
 use WebServCo\Error\Contract\ErrorHandlerInterface;
 use WebServCo\Error\Contract\ErrorHandlingServiceInterface;
 
@@ -37,6 +38,7 @@ final class DefaultErrorHandlingService implements ErrorHandlingServiceInterface
      * after exception handler initialization
      * and before execution of actual application logic.
      */
+    #[Override]
     public function handlePreExecutionErrors(): bool
     {
         $error = error_get_last();
@@ -60,6 +62,7 @@ final class DefaultErrorHandlingService implements ErrorHandlingServiceInterface
         );
     }
 
+    #[Override]
     public function initialize(): bool
     {
         /**
@@ -75,6 +78,7 @@ final class DefaultErrorHandlingService implements ErrorHandlingServiceInterface
         return true;
     }
 
+    #[Override]
     public function restore(): bool
     {
         return restore_error_handler();

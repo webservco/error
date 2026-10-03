@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WebServCo\Error\Service;
 
 use ErrorException;
+use Override;
 use WebServCo\Error\Contract\ErrorHandlerInterface;
 
 use function error_clear_last;
@@ -17,6 +18,7 @@ use function error_clear_last;
  */
 final class StrictErrorExceptionThrower implements ErrorHandlerInterface
 {
+    #[Override]
     public function handle(int $errno, string $errstr, string $errfile, int $errline): bool
     {
         // Make sure error is not reported again.
