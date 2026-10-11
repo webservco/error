@@ -1,76 +1,81 @@
 # webservco/error
 
-A PHP component/library.
+A PHP component/library. Please see [webservco/sandbox](https://webservco.github.io/sandbox/) for an example project using these types of components.
 
-Custom application error handling.
+PHP error handling for an application, with a default handler that turns every PHP error into an ErrorException.
+
+- Related: `webservco/application-default` (runs this service during bootstrap and shutdown), `webservco/exception` (handles the exceptions this throws)
+
+---
+
+## Installation
+
+```shell
+composer require webservco/error
+```
 
 ---
 
 ## Usage
 
-Implement interfaces:
-
-### `ErrorHandlerInterface`
-
 ```php
-interface ErrorHandlerInterface
-{
-    public function handle(
-        // The first parameter, errno, will be passed the level of the error raised, as an integer.
-        int $errno,
-        // The second parameter, errstr, will be passed the error message, as a string.
-        string $errstr,
-        // If the callback accepts a third parameter, errfile,
-        // it will be passed the filename that the error was raised in, as a string.
-        string $errfile,
-        // If the callback accepts a fourth parameter, errline,
-        // it will be passed the line number where the error was raised, as an integer.
-        int $errline,
-        // $errcontext removed in PHP 8
-    ): bool;
-}
-```
+use WebServCo\Error\Factory\DefaultErrorHandlingServiceFactory;
 
-### `ErrorHandlingServiceFactoryInterface`
-
-```php
-interface ErrorHandlingServiceFactoryInterface
-{
-    public function createErrorHandlingService(): ErrorHandlingServiceInterface;
-}
-```
-
-### `ErrorHandlingServiceInterface`
-
-```php
-interface ErrorHandlingServiceInterface
-{
-    public function handlePreExecutionErrors(): bool;
-
-    public function initialize(): bool;
-
-    public function restore(): bool;
-}
-```
-
----
-
-## Example implementation
-
-A simple handling service using a strict error handler (throws exception for any error) is provided.
-
-
-```php
-// Create service.
 $errorHandlingServiceFactory = new DefaultErrorHandlingServiceFactory();
+// \WebServCo\Error\Contract\ErrorHandlingServiceInterface
 $errorHandlingService = $errorHandlingServiceFactory->createErrorHandlingService();
 
-// In application bootstrap:
+// Application bootstrap, after the exception handler is set.
 $errorHandlingService->initialize();
 $errorHandlingService->handlePreExecutionErrors();
 
 // Application run.
 
-// In application shutdown:
+// Application shutdown.
 $errorHandlingService->restore();
 ```
+
+With `webservco/application-default` you don't call these yourself. Pass the factory to the application factory and `DefaultApplication` makes the calls.
+
+---
+
+## Contracts
+
+| Interface | Implementation | Purpose |
+| --- | --- | --- |
+| `Contract\ErrorHandlingServiceInterface` | `Service\DefaultErrorHandlingService` | Installs and restores the error handler, and reports errors raised before the script ran. |
+| `Contract\ErrorHandlingServiceFactoryInterface` | `Factory\DefaultErrorHandlingServiceFactory` | Creates the service with the strict handler. |
+| `Contract\ErrorHandlerInterface` | `Service\StrictErrorExceptionThrower` | The callback given to `set_error_handler()`. |
+
+Namespaces are relative to `WebServCo\Error\`.
+
+---
+
+## Notes
+
+`StrictErrorExceptionThrower` throws for every error, including notices, errors silenced with `@` and levels excluded by `error_reporting`. The exception code is 500.
+
+`initialize()` also sets `display_errors` to `0`. This has no effect on fatal errors in the script itself, because those happen before any code runs.
+
+`handlePreExecutionErrors()` throws an `ErrorException` if `error_get_last()` has an error. The exception code says what kind of error it was: 1 for a POST body over `post_max_size`, 500 for anything else.
+
+---
+
+## Development
+
+```shell
+# Start project.
+ddev start
+# Install dependencies.
+ddev c u
+# Run all validations.
+ddev c c
+# Run unit tests.
+ddev c test:dox
+```
+
+---
+
+## License
+
+[MIT](LICENSE.md)

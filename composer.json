@@ -20,7 +20,7 @@
             "dealerdirect/phpcodesniffer-composer-installer": true
         }
     },
-    "description" : "A PHP component/library.",
+    "description" : "A PHP component/library. PHP error handling for an application, with a default handler that turns every PHP error into an ErrorException.",
     "homepage" : "https://webserv.co",
     "keywords" : [
         "component",
